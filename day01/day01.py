@@ -69,34 +69,16 @@ sum = 0
 
 # text to int
 text_int_dict = {
-    "one": "1",
-    "two": "2",
-    "three": "3",
-    "four": "4",
-    "five": "5",
-    "six": "6",
-    "seven": "7",
-    "eight": "8",
-    "nine": "9"
+    "one": "on1e",
+    "two": "tw2o",
+    "three": "thr3ee",
+    "four": "fou4r",
+    "five": "fi5ve",
+    "six": "si6x",
+    "seven": "sev7en",
+    "eight": "ei8ght",
+    "nine": "ni9ne"
 }
-
-
-# find and replace the leftmost text number with its int
-def replace_leftmost_number(line):
-    leftmost_pos = None
-    leftmost_text = None
-
-    for text in text_int_dict.keys():
-        index = line.find(text)
-        if index > -1:
-            if leftmost_pos is None or index < leftmost_pos:
-                leftmost_pos = index
-                leftmost_text = text
-
-    if leftmost_text is not None:
-        line = line.replace(leftmost_text, text_int_dict[leftmost_text])
-    return line
-    
 
 # for each line in the input
 with open("input.txt") as fh:
@@ -106,16 +88,9 @@ with open("input.txt") as fh:
         first_num = None
         last_num = None
 
-        print(line)
-        # replace leftmost number until no changes are made
-        old_line = None
-        new_line = line
-        while old_line != new_line:
-            old_line = new_line
-            new_line = replace_leftmost_number(old_line)
-        line = new_line
-
-        print(line)
+        # replace string numbers with ints
+        for text in text_int_dict.keys():
+            line = line.replace(text, text_int_dict[text])
 
         # convert text numbers to ints
         for text in text_int_dict.keys():
@@ -131,9 +106,6 @@ with open("input.txt") as fh:
         # confirm we found numbers and sum
         assert first_num is not None
         assert last_num is not None
-        print(first_num + last_num)
-        print()
-
         sum += int(first_num + last_num)
 
-print(sum)  # 54627
+print(sum)  # 54649
