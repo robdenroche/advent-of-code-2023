@@ -31,7 +31,6 @@ of the part numbers in the engine schematic?
 """
 
 
-# TODO: missing numbers at end of line?
 def find_numbers(row):
     # list of (num, start, end) tuples
     number_list = list()
@@ -57,26 +56,26 @@ def find_numbers(row):
 
         j += 1
 
+    if num != "":
+        end = len(row)
+        number_list.append((int(num), start, end))
+
     return number_list
 
 
 def is_near_symbol(num, start, end, row, array):
     left = max(start - 1, 0)
-    right = min(end + 1, len(array[row]))
+    right = min(end + 1, len(array[row]) - 1)   # - 1 for zero based index
     top = max(row - 1, 0)
-    bottom = min(row + 1, len(array) - 1)   # handling empy last line?
+    bottom = min(row + 1, len(array) - 1)   # - 1 for zero based index
 
-    for i in range(top, bottom + 1):
-        for j in range(left, right + 1):
+    for i in range(top, bottom + 1):    # + 1 to include bottom
+        for j in range(left, right + 1):    # + 1 to include right
+            # print(i,j)
             if not str(array[i][j]).isnumeric() and str(array[i][j]) != ".":
                 # print(num, array[i][j])
                 return True
-
-    for i in range(top, bottom + 1):
-        for j in range(left, right + 1):
-            print(array[i][j], end="")
-        print()
-    print()
+            
     return False
 
 
@@ -98,4 +97,4 @@ for i in range(len(array)):
             sum += num
 
 
-print(sum)  # 
+print(sum)  # 535235
