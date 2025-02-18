@@ -1,4 +1,5 @@
 import typing
+from tqdm import tqdm
 
 """
 The almanac (your puzzle input) lists all of the seeds that need to be planted.
@@ -143,19 +144,158 @@ def read_input(filename: str) -> tuple[list, dict, dict]:
                 thing_map[source] = dest
 
                 while line := fh.readline():
+                    line = line.rstrip()
                     if line == "":
                         break
                     else:
+                        (dest_start, source_start, offset) = line.split()
+                        if dest not in range_map:
+                            range_map[dest] = list()
+                        range_map[dest].append(
+                            (int(dest_start), int(source_start), int(offset)))
 
+    return (seeds, thing_map, range_map)
+
+
+def get_location(seed: int, thing_map: dict, range_map: dict) -> int:
+
+    source = "seed"
+    val = seed
+
+    while source in thing_map:
+        dest = thing_map[source]
+        
+        for (dest_start, source_start, offset) in range_map[dest]:
+            # print(val, dest, dest_start, source_start, offset)
+            if val >= source_start and val < (source_start + offset):
+                val = dest_start + (val - source_start)
+                break
+
+        source = dest
+
+    return val
+
+
+seeds = list()
+thing_map = dict()
+range_map = dict()
+
+min_seed = None
+min_location = None
+
+(seeds, thing_map, range_map) = read_input("input.txt")
+
+for seed in seeds:
+    location = get_location(int(seed), thing_map, range_map)
+
+    if min_location is None:
+        min_location = location
+        min_seed = seed
+    elif location < min_location:
+        min_location = location
+        min_seed = seed
+
+print(min_seed, min_location)  # 2946842531 199602917
+
+
+"""
+Everyone will starve if you only plant such a small number of seeds. Re-reading
+the almanac, it looks like the seeds: line actually describes ranges of seed
+numbers.
+
+The values on the initial seeds: line come in pairs. Within each pair, the
+first value is the start of the range and the second value is the length of the
+range. So, in the first line of the example above:
+
+seeds: 79 14 55 13
+
+This line describes two ranges of seed numbers to be planted
+in the garden. The first range starts with seed number 79 and contains 14
+values: 79, 80, ..., 91, 92. The second range starts with seed number 55 and
+contains 13 values: 55, 56, ..., 66, 67.
+
+Now, rather than considering four seed numbers, you need to consider a total of
+27 seed numbers.
+
+In the above example, the lowest location number can be obtained from seed
+number 82, which corresponds to soil 84, fertilizer 84, water 84, light 77,
+temperature 45, humidity 46, and location 46. So, the lowest location number is
+46.
+
+Consider all of the initial seed numbers listed in the ranges on the first line
+of the almanac. What is the lowest location number that corresponds to any of
+the initial seed numbers?
+"""
+
+
+def read_input(filename: str) -> tuple[list, dict, dict]:
+    line = ""
+
+    seeds = list()
+    thing_map = dict()
+    range_map = dict()
+
+    with open(filename) as fh:
+        while line := fh.readline():
+            line = line.rstrip()
+
+            if "seeds:" in line:
+                # seeds: 79 14 55 13
+                seeds_vals = str(line.split(": ")[1]).split()
+                seeds_vals = [int(i) for i in seeds_vals]
+                i = 0
+                while i < len(seeds_vals):
+                    # add the range to seeds
+                    seeds.append((seeds_vals[i], seeds_vals[i+1]))
+                    i += 2
+            elif "map:" in line:
+                # seed-to-soil map:
+                # 50 98 2
+                # 52 50 48
+                # (ends with empty line)
+                (source, dest) = str(line.split(" ")[0]).split("-to-")
+                thing_map[source] = dest
+
+                while line := fh.readline():
+                    line = line.rstrip()
+                    if line == "":
+                        break
+                    else:
+                        (dest_start, source_start, offset) = line.split()
+                        if dest not in range_map:
+                            range_map[dest] = list()
+                        range_map[dest].append(
+                            (int(dest_start), int(source_start), int(offset)))
 
     return (seeds, thing_map, range_map)
 
 
 seeds = list()
-map = dict()
+thing_map = dict()
+range_map = dict()
 
-with open("sample.txt") as fh:
-    (seeds, map) = read_input(fh)
+min_seed = None
+min_location = None
 
+(seeds, thing_map, range_map) = read_input("input.txt")
 
+for (seed_start, seed_range) in seeds:
+    """
+    Predictably, this is slow... better would be get the destination ranges
+    possible from a given source range and then convert to the actual location
+    at the end (which would be trivial since the location range with the
+    lowest start would contain the lowest value)
+    """
+    for seed in tqdm(range(seed_start, seed_start + seed_range)):
+        location = get_location(int(seed), thing_map, range_map)
 
+        if min_location is None:
+            min_location = location
+            min_seed = seed
+        elif location < min_location:
+            min_location = location
+            min_seed = seed
+        
+        print(min_seed, min_location)
+
+print(min_seed, min_location)  # 2406693241 2254686
