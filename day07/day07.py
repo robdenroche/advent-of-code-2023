@@ -1,5 +1,3 @@
-
-
 """
 Because the journey will take a few days, she offers to teach you the game of
 Camel Cards. Camel Cards is sort of similar to poker except it's designed to be
@@ -68,16 +66,9 @@ of multiplying each hand's bid with its rank (765 * 1 + 220 * 2 + 28 * 3 + 684
 Find the rank of every hand in your set. What are the total winnings?
 """
 
-# collect hands (assumes no repeats)
-hand_bids = dict()
-
-# use these for ranking
-hand_types = dict()
-hand_ranks = dict()
-
 
 def get_type(hand):
-    # 1: high card 
+    # 1: high card
     # 2: pair
     # 3: two pair
     # 4: three of a kind
@@ -93,7 +84,7 @@ def get_type(hand):
         if card not in card_count:
             card_count[card] = 0
         card_count[card] += 1
-    
+
     pairs = 0
     trips = 0
     fours = 0
@@ -142,12 +133,12 @@ def get_sortable(hand):
         "K": "13",
         "A": "14",
     }
-    
+
     sortable_str = str(get_type(hand))
 
     for card in hand:
         sortable_str += card_map[card]
-    
+
     return int(sortable_str)
 
 
@@ -167,11 +158,9 @@ ranked_bid_sum = 0
 
 sorted_hands = list(sorted(sortable_bids.keys()))
 for i in range(0, len(sorted_hands)):
-    ranked_bid_sum += (i+1) * sortable_bids[sorted_hands[i]]
+    ranked_bid_sum += (i + 1) * sortable_bids[sorted_hands[i]]
 
 print(ranked_bid_sum)  # 253638586
-
-
 
 
 """
@@ -207,3 +196,117 @@ Using the new joker rule, find the rank of every hand in your set. What are the
 new total winnings?
 """
 
+
+def get_type(hand):
+    # 1: high card
+    # 2: pair
+    # 3: two pair
+    # 4: three of a kind
+    # 5: full house
+    # 6: four of a kind
+    # 7: five of a kind
+
+    type = 1
+
+    card_count = dict()
+
+    for card in hand:
+        if card not in card_count:
+            card_count[card] = 0
+        card_count[card] += 1
+
+    # add jokers to the card with the highest count
+    if "J" in card_count:
+        if card_count["J"] == 5:
+            pass  # can't improve five of a kind
+        else:
+            max_card = ""
+            max_count = 0
+
+            # find the highest non-joker card count
+            for card in card_count.keys():
+                if card != "J":
+                    if card_count[card] > max_count:
+                        max_card = card
+                        max_count = card_count[card]
+            
+            # change the jokers into the highest count card
+            card_count[max_card] += card_count["J"]
+            card_count["J"] = 0
+
+    pairs = 0
+    trips = 0
+    fours = 0
+    fives = 0
+
+    for card in card_count:
+        if card_count[card] == 2:
+            pairs += 1
+        elif card_count[card] == 3:
+            trips += 1
+        elif card_count[card] == 4:
+            fours += 1
+        elif card_count[card] == 5:
+            fives += 1
+
+    if fives > 0:
+        type = 7
+    elif fours > 0:
+        type = 6
+    elif trips > 0 and pairs > 0:
+        type = 5
+    elif trips > 0:
+        type = 4
+    elif pairs > 1:
+        type = 3
+    elif pairs > 0:
+        type = 2
+
+    return type
+
+
+def get_sortable(hand):
+
+    card_map = {
+        "2": "02",
+        "3": "03",
+        "4": "04",
+        "5": "05",
+        "6": "06",
+        "7": "07",
+        "8": "08",
+        "9": "09",
+        "T": "10",
+        "J": "01",  # Js are jokers now
+        "Q": "12",
+        "K": "13",
+        "A": "14",
+    }
+
+    sortable_str = str(get_type(hand))
+
+    for card in hand:
+        sortable_str += card_map[card]
+
+    return int(sortable_str)
+
+
+sortable_bids = dict()
+
+with open("input.txt") as fh:
+    for line in fh:
+        line = line.rstrip()
+
+        (hand, bid) = line.split()
+
+        bid = int(bid)
+
+        sortable_bids[get_sortable(hand)] = bid
+
+ranked_bid_sum = 0
+
+sorted_hands = list(sorted(sortable_bids.keys()))
+for i in range(0, len(sorted_hands)):
+    ranked_bid_sum += (i + 1) * sortable_bids[sorted_hands[i]]
+
+print(ranked_bid_sum)  # 253253225
