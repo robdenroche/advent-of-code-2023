@@ -116,7 +116,7 @@ def print_galaxy(galaxy):
 galaxy = list()
 
 # read the input
-with open("sample.txt") as fh:
+with open("input.txt") as fh:
     for line in fh:
         line = line.rstrip()
 
@@ -130,7 +130,6 @@ for i in range(0, len(galaxy)):
     if "#" in galaxy[i]:
         new_galaxy.append(galaxy[i])
     else:
-        print(i)
         new_galaxy.append(deepcopy(galaxy[i]))
         new_galaxy.append(deepcopy(galaxy[i]))
 
@@ -156,4 +155,24 @@ for j in range(0, len(galaxy[0])):
 
 galaxy = new_galaxy
 
+# make list of galaxy coordinates
+gal_list = list()
+for i in range(0, len(galaxy)):
+    for j in range(0, len(galaxy[i])):
+        if galaxy[i][j] == "#":
+            gal_list.append((i, j))
 
+# loop through pairs and sum distances
+sum = 0
+
+for pair in [
+    (gal_list[x], gal_list[y])
+    for x in range(len(gal_list))
+    for y in range(x + 1, len(gal_list))
+]:
+    (i1, j1) = pair[0]
+    (i2, j2) = pair[1]
+
+    sum += abs(i1 - i2) + abs(j1 - j2)
+
+print(sum)  # 9609130
