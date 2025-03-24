@@ -176,3 +176,78 @@ for pair in [
     sum += abs(i1 - i2) + abs(j1 - j2)
 
 print(sum)  # 9609130
+
+
+"""
+The galaxies are much older (and thus much farther apart) than the researcher
+initially estimated.
+
+Now, instead of the expansion you did before, make each empty row or column one
+million times larger. That is, each empty row should be replaced with 1000000
+empty rows, and each empty column should be replaced with 1000000 empty
+columns.
+
+(In the example above, if each empty row or column were merely 10 times larger,
+the sum of the shortest paths between every pair of galaxies would be 1030. If
+each empty row or column were merely 100 times larger, the sum of the shortest
+paths between every pair of galaxies would be 8410. However, your universe will
+need to expand far beyond these values.)
+
+Starting with the same initial image, expand the universe according to these
+new rules, then find the length of the shortest path between every pair of
+galaxies. What is the sum of these lengths?
+"""
+
+# galaxy is a 2d array (list of lists)
+galaxy = list()
+
+# read the input
+with open("input.txt") as fh:
+    for line in fh:
+        line = line.rstrip()
+
+        galaxy.append(list(line))
+
+# time to get creative... if I was starting from scratch I'd mark the empty
+# rows and columns instead of expanding and then just keep the galaxy coords,
+# but instead lets try using the difference between the unexpanded and +1
+# expanded coordinates
+
+expanded_gal_list = deepcopy(gal_list)
+gal_list = list()
+
+# make list of galaxy coordinates
+gal_list = list()
+for i in range(0, len(galaxy)):
+    for j in range(0, len(galaxy[i])):
+        if galaxy[i][j] == "#":
+            gal_list.append((i, j))
+
+
+# use the differences to get the million expanded coordinates
+million_gal_list = list()
+
+for i in range(0, len(gal_list)):
+    (i0, j0) = gal_list[i]
+    (i1, j1) = expanded_gal_list[i]
+
+    i_mil = i0 + (i1 - i0) * (1000000 - 1)
+    j_mil = j0 + (j1 - j0) * (1000000 - 1)
+
+    million_gal_list.append((i_mil, j_mil))
+
+
+# loop through pairs and sum distances
+sum = 0
+
+for pair in [
+    (million_gal_list[x], million_gal_list[y])
+    for x in range(len(million_gal_list))
+    for y in range(x + 1, len(million_gal_list))
+]:
+    (i1, j1) = pair[0]
+    (i2, j2) = pair[1]
+
+    sum += abs(i1 - i2) + abs(j1 - j2)
+
+print(sum)  # 702152204842
